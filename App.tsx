@@ -8,9 +8,9 @@ import { Crown, AlertTriangle, Play, Pause, Download } from 'lucide-react';
 
 const App: React.FC = () => {
   const [config, setConfig] = useState<ThumbnailConfig>({
-    text: "LOST THE BATTLE...",
-    subText: "RIP IPAD 💀📱",
-    chaosLevel: 85,
+    text: "THIS LOSS DESTROYS EVERYTHING",
+    subText: "SCREEN BROKEN?! 💀📱",
+    chaosLevel: 90,
     theme: 'defeat',
     aspectRatio: '9:16',
     includeAudio: false,
@@ -86,7 +86,7 @@ const App: React.FC = () => {
              ClashGen
            </h1>
            <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-sm md:text-base mt-2">
-             Broken iPad Edition 📱💥
+             Epic Fail Edition 📱💥
            </p>
         </header>
 

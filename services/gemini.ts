@@ -5,32 +5,82 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const generateThumbnailImage = async (config: ThumbnailConfig): Promise<string> => {
   try {
-    // Toned down "realistic destruction" to "digital/fantasy chaos" to avoid safety filters
+    // Chaos levels now map to comic/cartoon intensity
     const chaosDescription = config.chaosLevel > 80 
-      ? "intense magical overload, electric sparks flying, digital glitch artifacts, neon smoke, dramatic action blur, high contrast"
+      ? "complete visual overload, comic-style explosion lines, flying debris, intense motion blur, electric arcs, screaming faces"
       : config.chaosLevel > 50
-      ? "battle damage, energy sparks, glowing cracks, intense dynamic lighting"
-      : "moderate battle wear, dynamic shadows, cinematic lighting";
+      ? "dynamic action lines, sweat drops, shaking effect, sparks, heavy impact frames"
+      : "dramatic posing, bold outlines, expressive faces, focused lighting";
+
+    let themeSpecificPrompt = "";
+    
+    switch (config.theme) {
+      case 'victory':
+        themeSpecificPrompt = `
+          SCENARIO: "Epic Win - Three Crown Glory".
+          CENTERPIECE: A glowing, golden iPad showing a "Victory" banner. It is pristine and radiating holy light.
+          CHARACTERS: Cartoon King laughing hysterically, Mega Knight flexing muscles, Goblins throwing confetti.
+          COLORS: Gold, bright blue, cyan, and white. Heavenly, saturated lighting.
+        `;
+        break;
+      case 'funny':
+        themeSpecificPrompt = `
+          SCENARIO: "Confused Gamer Moment".
+          CENTERPIECE: A smoking iPad that looks melted.
+          CHARACTERS: King scratching his head confused, Hog Rider looking shocked, a Skeleton shrugging.
+          COLORS: Bright yellow, orange, and purple. Wacky, tilted angles.
+        `;
+        break;
+      case 'glitch':
+        themeSpecificPrompt = `
+          SCENARIO: "System Crash - Glitch World".
+          CENTERPIECE: An iPad dissolving into digital pixels and matrix code.
+          CHARACTERS: Troops glitching out, half-loaded textures, missing eyes, T-posing models.
+          COLORS: Neon purple, matrix green, hot pink. CRT monitor scanlines.
+        `;
+        break;
+      case 'defeat':
+      default:
+        // This is the core "Epic Fail" concept requested
+        themeSpecificPrompt = `
+          SCENARIO: "Epic Fail – Clash Royale Chaos".
+          CENTERPIECE: A Broken iPad in the middle with cracks forming a cartoon-style explosion. 
+          CHARACTERS: Cartoon/comic-style Clash Royale troops with EXAGGERATED expressions interacting with the device.
+             - Mega Knight crying dramatically (waterfalls of tears).
+             - Goblin panicking and poking the cracked screen.
+             - Baby Dragon flying away in fear.
+             - King sweating bullets with bulging eyes.
+          COLORS: Neon reds, oranges, and yellows for explosions contrasting with blue/green troops.
+        `;
+        break;
+    }
 
     const prompt = `
-      Create a high-quality, 3D rendered style digital art image suitable for a ${config.aspectRatio === '9:16' ? 'TikTok' : 'YouTube'} thumbnail.
+      Create a high-quality, "Scroll-stopping" ${config.aspectRatio === '9:16' ? 'TikTok' : 'YouTube'} thumbnail.
       
-      CORE CONCEPT: A "Gamer's Tablet after a defeat".
+      STYLE GUIDE: 
+      - CARTOON + COMIC BOOK + CHAOTIC HUMOR. 
+      - Thick bold outlines.
+      - Bright, vibrant, saturated colors. 
+      - Exaggerated facial expressions (anime/comic style).
+      - NOT realistic. Think stylized promotional art.
+
+      ${themeSpecificPrompt}
+
+      BACKGROUND:
+      - Cartoon battlefield with debris flying, cards in mid-air (Arrows, Fireball).
+      - Dynamic "impact" lines radiating from the center.
       
-      VISUAL ELEMENTS:
-      1. Main Subject: A stylized gaming tablet in the center with a DRAMATIC SPIDERWEB CRACK EFFECT on the screen. The screen is glowing with a "Defeat" icon or a crying cartoon King.
-      2. Background: A blurred fantasy battle arena. Magical particles and colorful smoke.
-      3. Lighting: ${config.theme === 'victory' ? 'Golden, heavenly, god-rays.' : 'Neon red, orange, and yellow emergency lighting. Electric sparks.'}
-      4. Atmosphere: ${chaosDescription}.
+      ATMOSPHERE: ${chaosDescription}
       
-      OVERLAY TEXT (Must be legible, 3D, and punchy like a gaming thumbnail):
-      - Primary Text (Big, Impact font): "${config.text}"
-      ${config.subText ? `- Secondary Text (Smaller, glowing): "${config.subText}"` : ''}
+      OVERLAY TEXT (Must be integrated into the art, Big Comic Book Font):
+      - Primary Text: "${config.text}"
+      ${config.subText ? `- Secondary Text: "${config.subText}"` : ''}
       
-      STYLE DETAILS:
-      - 3D render, vibrant saturated colors.
-      - Floating 3D emojis: 🔥, 💀, 💔.
-      - "Scroll-stopping" YouTube/TikTok thumbnail aesthetic.
+      COMPOSITION:
+      - Subject centered.
+      - Elements popping out towards the viewer (3D pop-out effect).
+      - Floating emojis in 3D style: 💀, 🔥, 🤣, 📱.
     `;
 
     const response = await ai.models.generateContent({
@@ -45,14 +95,12 @@ export const generateThumbnailImage = async (config: ThumbnailConfig): Promise<s
       }
     });
 
-    // Check for safety filtering or empty candidates
     if (!response.candidates || response.candidates.length === 0) {
       throw new Error("Image generation failed. The prompt might have triggered safety filters. Try lowering the Chaos Level.");
     }
 
     const candidate = response.candidates[0];
     
-    // Check if the model refused to generate due to safety
     if (candidate.finishReason && candidate.finishReason !== 'STOP') {
       console.warn("Generation finished with reason:", candidate.finishReason);
       if (candidate.finishReason === 'SAFETY') {
@@ -66,7 +114,6 @@ export const generateThumbnailImage = async (config: ThumbnailConfig): Promise<s
       }
     }
 
-    console.log("Full Response:", JSON.stringify(response, null, 2));
     throw new Error("No image data found. The model might have returned only text.");
 
   } catch (error) {
@@ -77,14 +124,13 @@ export const generateThumbnailImage = async (config: ThumbnailConfig): Promise<s
 
 export const generateGamerAudio = async (config: ThumbnailConfig): Promise<string> => {
   try {
-    // Determine the script based on the text/theme
     let scriptPrompt = "";
     if (config.theme === 'defeat') {
-      scriptPrompt = `Act as a raging Clash Royale gamer who just broke their iPad. Scream and cry dramatically: "No! My internet! I lost the match and now my screen is cracked! ${config.text}!"`;
+      scriptPrompt = `Act as a raging cartoon gamer character. Scream dramatically and exaggerate: "NOOOO! MY SCREEN! THE MEGA KNIGHT JUMPED ON MY IPAD! ${config.text}!"`;
     } else if (config.theme === 'victory') {
-      scriptPrompt = `Act as a hyped Clash Royale gamer. Scream with joy: "Let's go! Three crown victory! easy clap! ${config.text}!"`;
+      scriptPrompt = `Act as a triumphant cartoon King. Laugh heartily and shout: "HEE HEE HEE HAW! EASY WIN! ${config.text}!"`;
     } else {
-      scriptPrompt = `Act as a funny, confused gamer. Say: "Wait, what just happened? Did my iPad just explode? ${config.text}?"`;
+      scriptPrompt = `Act as a confused goblin. Squeaky voice: "Uh oh. I think I broke it. ${config.text}?"`;
     }
 
     const response = await ai.models.generateContent({

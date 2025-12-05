@@ -107,7 +107,7 @@ export const Controls: React.FC<ControlsProps> = ({ config, onChange }) => {
           className="w-full h-3 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-red-500 hover:accent-red-400"
         />
         <p className="text-xs text-slate-500 mt-1 italic">
-            {config.chaosLevel < 30 ? "Chill vibes." : config.chaosLevel < 70 ? "Getting spicy..." : "ABSOLUTE DESTRUCTION 🔥"}
+            {config.chaosLevel < 30 ? "Comic Book style." : config.chaosLevel < 70 ? "Intense Action..." : "TOTAL DESTRUCTION 🔥"}
         </p>
       </div>
 
@@ -132,12 +132,12 @@ export const Controls: React.FC<ControlsProps> = ({ config, onChange }) => {
       <button 
         onClick={() => {
             const themes: any[] = ['defeat', 'victory', 'funny', 'glitch'];
-            const texts = ["HE HE HE HAW", "UNINSTALLING...", "I BROKE IT", "MY MOM IS MAD"];
+            const texts = ["HE HE HE HAW", "UNINSTALLING...", "THIS LOSS DESTROYS EVERYTHING", "MY MOM IS MAD", "MEGA KNIGHT CRYING", "PHONE BROKEN!"];
             onChange({
                 ...config,
                 text: texts[Math.floor(Math.random() * texts.length)],
                 theme: themes[Math.floor(Math.random() * themes.length)],
-                chaosLevel: Math.floor(Math.random() * 100)
+                chaosLevel: Math.floor(Math.random() * 50) + 50 // Keep chaos high for this mode
             })
         }}
         className="w-full py-2 flex items-center justify-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-bold uppercase"
